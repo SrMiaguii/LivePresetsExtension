@@ -102,7 +102,7 @@ std::vector<TVITEM> LivePresetsTreeAdapter::getChilds(TVITEM* parent) {
             mData[lparam] = {TYPE::MASTERTRACK, lparam, TYPE::LIVEPRESET};
             child.lParam = lparam;
 
-            child.state = TVIS_EXPANDED;
+            child.state = 0;
             childs.push_back(child);
         }
 
@@ -117,7 +117,7 @@ std::vector<TVITEM> LivePresetsTreeAdapter::getChilds(TVITEM* parent) {
             mData[lparam] = {TYPE::TRACK, lparam, TYPE::LIVEPRESET};
             child.lParam = lparam;
 
-            child.state = TVIS_EXPANDED;
+            child.state = 0;
             childs.push_back(child);
         }
     } else {
