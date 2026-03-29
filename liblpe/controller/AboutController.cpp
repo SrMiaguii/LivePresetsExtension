@@ -33,13 +33,12 @@
 #include <version.h>
 
 /**
- * Window showing about information like licensing, build version and date, contributions, license etc.
+ * Window showing about information like version and build date.
  */
-AboutController::AboutController() : DockWindow(IDD_ABOUT, "", "AboutController", 0) {
-    auto temp = WDL_FastString();
-    temp.AppendFormatted(4096, "LivePresets: %s (%s)",
-            LPE_BUILD_VERSION,
-            LPE_BUILD_DATE
-    );
-    mTitle = temp.Get();
+AboutController::AboutController() : DockWindow(IDD_ABOUT, "LivePresetsExtension", "AboutController", 0) {
+}
+
+void AboutController::onInitDlg() {
+    SetDlgItemText(mHwnd, IDC_ABOUT_VERSION, LPE_BUILD_VERSION);
+    SetDlgItemText(mHwnd, IDC_ABOUT_DATE, LPE_BUILD_DATE);
 }

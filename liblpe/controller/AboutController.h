@@ -36,8 +36,9 @@ class AboutController final : public DockWindow {
 public:
     AboutController();
 protected:
+    void onInitDlg() override;
     LONG getMinWidth() override { return 250; }
-    LONG getMinHeight() override { return 50; }
+    LONG getMinHeight() override { return 60; }
 };
 
 #endif //LPE_ABOUTCONTROLLER_H

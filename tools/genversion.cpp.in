@@ -40,7 +40,7 @@ int main() {
   auto tm = *std::localtime(&t);
 
   std::ostringstream oss;
-  oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+  oss << std::put_time(&tm, "%d-%m-%y %H:%M");
   auto str = oss.str();
 
   std::cout << "#define LPE_BUILD_DATE \"" << str << "\"";

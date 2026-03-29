@@ -28,6 +28,8 @@
 #define IDC_COMBO                       1369
 #define IDC_LABEL1                      1370
 #define IDC_VERSION_WARNING             1373
+#define IDC_ABOUT_VERSION               1374
+#define IDC_ABOUT_DATE                  1375
 
 //styles
 #define DEFAULT_FONT 8, "MS Shell Dlg"
