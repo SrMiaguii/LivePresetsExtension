@@ -29,7 +29,6 @@
 
 #include <liblpe/ui/base/ListView.h>
 #include <liblpe/data/models/LivePreset.h>
-#include <liblpe/data/models/Hardware.h>
 
 /**
  * A c++ wrapper class for winapi ListView. Use ListViewAdapter to customize
@@ -42,7 +41,6 @@ ListView<T>::ListView(HWND hwnd) : mHwnd(hwnd) {
     ListView_SetExtendedListViewStyleEx(hwnd, dw, dw);
 }
 template ListView<LivePreset>::ListView(HWND hwnd);
-template ListView<Control>::ListView(HWND hwnd);
 
 template<typename T>
 ListView<T>::~ListView() {
@@ -50,7 +48,6 @@ ListView<T>::~ListView() {
     mAdapter.release();
 }
 template ListView<LivePreset>::~ListView();
-template ListView<Control>::~ListView();
 
 /**
 * Adds a callback to the ListView for different ui actions
@@ -61,7 +58,6 @@ void ListView<T>::addListViewEventListener(const ListView::Callback & listener) 
     listeners.push_back(listener);
 }
 template void ListView<LivePreset>::addListViewEventListener(const ListView::Callback & listener);
-template void ListView<Control>::addListViewEventListener(const ListView::Callback & listener);
 
 /**
  * Removes the callback from the ListView
@@ -75,7 +71,6 @@ void ListView<T>::removeListViewEventListener(const ListView::Callback& listener
     listeners.erase(remove_if(listeners.begin(), listeners.end(), functor), listeners.end());
 }
 template void ListView<LivePreset>::removeListViewEventListener(const ListView::Callback& listener);
-template void ListView<Control>::removeListViewEventListener(const ListView::Callback& listener);
 
 /**
  * Let the ListView pull all item updates from the adapter and update its ui.
@@ -152,7 +147,6 @@ void ListView<T>::invalidate() {
     }
 }
 template void ListView<LivePreset>::invalidate();
-template void ListView<Control>::invalidate();
 
 template<typename T>
 void ListView<T>::selectIndex(int index) {
@@ -160,7 +154,6 @@ void ListView<T>::selectIndex(int index) {
     ListView_SetItemState(mHwnd, index, LVIS_SELECTED, LVIS_SELECTED);
 }
 template void ListView<LivePreset>::selectIndex(int index);
-template void ListView<Control>::selectIndex(int index);
 
 /**
  * Returns the indices of the selected ListView rows.
@@ -180,7 +173,6 @@ std::vector<int> ListView<T>::getSelectedIndices() {
     return selectedIndices;
 }
 template std::vector<int> ListView<LivePreset>::getSelectedIndices();
-template std::vector<int> ListView<Control>::getSelectedIndices();
 
 /**
  * Must be called by the parent window
@@ -226,7 +218,6 @@ int ListView<T>::onNotify(WPARAM, LPARAM lParam) {
     return 0;
 }
 template int ListView<LivePreset>::onNotify(WPARAM, LPARAM lParam);
-template int ListView<Control>::onNotify(WPARAM, LPARAM lParam);
 
 /**
  * Sets the adapter for the ListView that defines behaviour and items.
@@ -239,7 +230,6 @@ void ListView<T>::setAdapter(std::unique_ptr<ListViewAdapter<T>> adapter) {
     sortByColumn(-1);
 }
 template void ListView<LivePreset>::setAdapter(std::unique_ptr<ListViewAdapter<LivePreset>> adapter);
-template void ListView<Control>::setAdapter(std::unique_ptr<ListViewAdapter<Control>> adapter);
 
 /**
  * Returns the current adapter of the ListView.
@@ -250,7 +240,6 @@ ListViewAdapter<T>* ListView<T>::getAdapter() {
     return mAdapter.get();
 }
 template ListViewAdapter<LivePreset>* ListView<LivePreset>::getAdapter();
-template ListViewAdapter<Control>* ListView<Control>::getAdapter();
 
 /**
  * Should be called by the parent window onDestroy
@@ -264,7 +253,6 @@ void ListView<T>::onDestroy() {
     }
 }
 template void ListView<LivePreset>::onDestroy();
-template void ListView<Control>::onDestroy();
 
 /**
 * Deletes all columns and then readds them according to the specified columns in the adapter.
@@ -287,7 +275,6 @@ void ListView<T>::updateColumns() {
     }
 }
 template void ListView<LivePreset>::updateColumns();
-template void ListView<Control>::updateColumns();
 
 /**
  * Updates the header of the selected column to display a sorting order and notifies the adapter to change its sorting.
@@ -341,4 +328,3 @@ void ListView<T>::sortByColumn(int columnIndex) {
     }
 }
 template void ListView<LivePreset>::sortByColumn(int columnIndex);
-template void ListView<Control>::sortByColumn(int columnIndex);

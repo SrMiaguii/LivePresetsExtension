@@ -91,8 +91,15 @@ const char* LivePresetsListAdapter::getLvItemText(int index, int column) {
             return preset->mName.data();
         case COLUMN::DESCRIPTION:
             return preset->mDescription.data();
-        case COLUMN::TIME:
-            return ctime(&preset->mDate);
+        case COLUMN::TIME: {
+            struct tm* t = localtime(&preset->mDate);
+            if (t) {
+                strftime(preset->mDateText, sizeof(preset->mDateText), "%d-%m-%y %H:%M", t);
+            } else {
+                preset->mDateText[0] = '\0';
+            }
+            return preset->mDateText;
+        }
     }
 }
 
@@ -126,15 +133,15 @@ void LivePresetsListAdapter::onChangedSortingColumn(LVCOLUMN col, bool reverse) 
                 setComparator([](LivePreset* a, LivePreset* b) -> bool {
                     bool aIsActive = g_lpe->mModel->getActivePreset() == a;
                     bool bIsActive = g_lpe->mModel->getActivePreset() == b;
-
-                    return aIsActive < bIsActive;
+                    if (aIsActive != bIsActive) return aIsActive < bIsActive;
+                    return a < b;
                 });
             } else {
                 setComparator([](LivePreset* a, LivePreset* b) -> bool {
                     bool aIsActive = g_lpe->mModel->getActivePreset() == a;
                     bool bIsActive = g_lpe->mModel->getActivePreset() == b;
-
-                    return aIsActive > bIsActive;
+                    if (aIsActive != bIsActive) return aIsActive > bIsActive;
+                    return a < b;
                 });
             }
             break;

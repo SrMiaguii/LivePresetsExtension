@@ -72,11 +72,21 @@ void LivePresetEditController::onInitDlg() {
     auto comboAdapter = std::make_unique<FilterPresetsComboAdapter>(FilterPreset_GetNames(g_lpe->mModel->mFilterPresets));
     mCombo->setAdapter(std::move(comboAdapter));
 
+    // Determine which filter to show: saved filter name, then default, then none
+    std::string nameToFind = mPreset->mFilterName.empty()
+        ? g_lpe->mModel->mDefaultFilterPreset
+        : mPreset->mFilterName;
+
     int index = 0;
     for (auto *af : g_lpe->mModel->mFilterPresets) {
-        auto *bf = mPreset->extractFilterPreset();
-        if (FilterPreset_IsEqual(af, bf)) {
+        if (af->mId.name == nameToFind) {
             SendMessage(mCombo->mHwnd, CB_SETCURSEL, index, 0);
+            // apply filter if this is a new preset (no filter saved yet)
+            if (mPreset->mFilterName.empty()) {
+                mPreset->applyFilterPreset(af);
+                mPreset->mFilterName = af->mId.name;
+            }
+            break;
         }
         index++;
     }
@@ -140,6 +150,7 @@ void LivePresetEditController::onCommand(WPARAM wparam, LPARAM lparam) {
         auto tempName = std::string(name);
         if (FilterPreset* preset = FilterPreset_GetFilterByName(g_lpe->mModel->mFilterPresets, &tempName)) {
             mPreset->applyFilterPreset(preset);
+            mPreset->mFilterName = tempName;
             mTree->invalidate();
         }
         return;

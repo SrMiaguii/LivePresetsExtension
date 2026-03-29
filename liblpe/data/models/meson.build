@@ -10,9 +10,6 @@ project_sources +=files(
     'StringProjectStateContext.cpp',
     'SwSendInfo.cpp',
     'TrackInfo.cpp',
-    'Control.cpp',
-    'ControlInfo.cpp',
-    'Hardware.cpp',
 )
 
 subdir('base')

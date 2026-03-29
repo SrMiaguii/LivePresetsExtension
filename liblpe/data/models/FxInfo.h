@@ -47,6 +47,7 @@ public:
     //data that can be recalled
     Parameter<int> mIndex = Parameter<int>(this, "INDEX", 0);
     Parameter<bool> mEnabled = Parameter<bool>(this, "ENABLED", true);
+    Parameter<bool> mOnline = Parameter<bool>(this, "ONLINE", true);
     Parameter<std::string> mPresetName = Parameter<std::string>(this, "PRESETNAME", "");
 
     [[nodiscard]] char *getTreeText() const override;

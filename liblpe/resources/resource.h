@@ -5,12 +5,9 @@
 #define IDD_LIVEPRESET                  191
 #define IDD_SETTINGS                    193
 #define IDD_CONFIRM                 194
-#define IDD_CONTROLVIEW                 195
 #define IDD_ABOUT                       196
 #define IDC_ADD                         1090
 #define IDC_REMOVE                      1093
-#define IDC_ADD2                        1091
-#define IDC_REMOVE2                     1092
 #define IDC_LIST                        1095
 #define IDC_EDIT                        1096
 #define IDC_SAVE                        1100
@@ -30,8 +27,7 @@
 #define IDC_TOGGLETRACKVISIBILITY       1368
 #define IDC_COMBO                       1369
 #define IDC_LABEL1                      1370
-#define IDC_TAB                         1371
-#define IDC_ASSIGNINFO                  1372
+#define IDC_VERSION_WARNING             1373
 
 //styles
 #define DEFAULT_FONT 8, "MS Shell Dlg"

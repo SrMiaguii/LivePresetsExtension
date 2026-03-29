@@ -306,6 +306,19 @@ void LivePresetsTreeAdapter::addChildsForFx(FxInfo* item, std::vector<TVITEM>* c
         TVITEM child;
         child.mask = TVIF_TEXT | TVIF_PARAM;
 
+        child.pszText = item->mOnline.getTreeText();
+        child.cchTextMax = sizeof(item->mOnline.getTreeText());
+
+        auto lparam = (LPARAM) &item->mOnline;
+        mData[lparam] = {TYPE::PARAM, lparam, TYPE::FX};
+        child.lParam = lparam;
+
+        childs->push_back(child);
+    }
+    {
+        TVITEM child;
+        child.mask = TVIF_TEXT | TVIF_PARAM;
+
         child.pszText = item->mPresetName.getTreeText();
         child.cchTextMax = sizeof(item->mPresetName.getTreeText());
 

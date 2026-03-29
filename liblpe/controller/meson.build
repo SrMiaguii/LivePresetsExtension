@@ -4,5 +4,4 @@ project_sources += files(
     'LivePresetEditController.cpp',
     'LivePresetsController.cpp',
     'SettingsController.cpp',
-    'ControlViewController.cpp'
 )

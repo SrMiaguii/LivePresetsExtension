@@ -60,8 +60,13 @@ void LivePresetsController::onInitDlg() {
     mList->addListViewEventListener([this](NMLISTVIEW* event) -> void {
         switch (event->hdr.code)         {
             case NM_DBLCLK: {
-                auto *const preset = mList->getAdapter()->getItem(event->iItem);
-                recallLivePreset(preset);
+                if (event->iItem < 0) break;
+                LVITEM lvItem = {};
+                lvItem.mask = LVIF_PARAM;
+                lvItem.iItem = event->iItem;
+                ListView_GetItem(mList->mHwnd, &lvItem);
+                auto *const preset = (LivePreset*) lvItem.lParam;
+                if (preset) recallLivePreset(preset);
                 break;
             }
         }
@@ -114,7 +119,13 @@ void LivePresetsController::updateSelectedPreset() const {
     if (indices.size() != 1)
         return;
 
-    auto *preset = mList->getAdapter()->getItem(indices.front());
+    LVITEM lvItem = {};
+    lvItem.mask = LVIF_PARAM;
+    lvItem.iItem = indices.front();
+    ListView_GetItem(mList->mHwnd, &lvItem);
+    auto *preset = (LivePreset*) lvItem.lParam;
+    if (!preset) return;
+
     preset->saveCurrentState(true);
     Undo_OnStateChangeEx2(nullptr, "Update LivePreset", UNDO_STATE_MISCCFG, -1);
 }
@@ -125,7 +136,12 @@ void LivePresetsController::removeSelectedPresets() const {
 
     std::vector<LivePreset*> presets;
     for (auto index : mList->getSelectedIndices()) {
-        presets.push_back(mList->getAdapter()->getItem(index));
+        LVITEM lvItem = {};
+        lvItem.mask = LVIF_PARAM;
+        lvItem.iItem = index;
+        ListView_GetItem(mList->mHwnd, &lvItem);
+        auto *preset = (LivePreset*) lvItem.lParam;
+        if (preset) presets.push_back(preset);
     }
     g_lpe->mModel->removePresets(presets);
     mList->invalidate();
@@ -143,7 +159,12 @@ void LivePresetsController::editSelectedPreset() const {
     if (indices.size() != 1)
         return;
 
-    auto *preset = mList->getAdapter()->getItem(indices.front());
+    LVITEM lvItem = {};
+    lvItem.mask = LVIF_PARAM;
+    lvItem.iItem = indices.front();
+    ListView_GetItem(mList->mHwnd, &lvItem);
+    auto *preset = (LivePreset*) lvItem.lParam;
+    if (!preset) return;
 
     WDL_FastString str;
     preset->persist(str);
@@ -214,7 +235,7 @@ void LivePresetsController::applyFilterToSelectedTracks(int filterIndex) const {
     }
 }
 
-void LivePresetsController::onCommand(WPARAM wParam, LPARAM) {
+void LivePresetsController::onCommand(WPARAM wParam, LPARAM lParam) {
     switch (wParam) {
         case IDC_ADD:
             createPreset();

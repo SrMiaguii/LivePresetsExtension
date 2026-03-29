@@ -50,7 +50,6 @@ LivePresetsModel::~LivePresetsModel() {
  */
 LivePresetsModel& LivePresetsModel::operator=(LivePresetsModel&& other) noexcept {
     //reassign all rvalues of rvalue reference other
-    mHardwares = other.mHardwares;
     mPresets = other.mPresets;
     mFilterPresets = other.mFilterPresets;
     mActivePreset = other.mActivePreset;
@@ -63,7 +62,6 @@ LivePresetsModel& LivePresetsModel::operator=(LivePresetsModel&& other) noexcept
 
     //make all pointers null and create empty containers for now empty instance other that its destruction does not
     //affect this instance
-    other.mHardwares = std::vector<Hardware*>();
     other.mPresets = std::vector<LivePreset*>();
     other.mFilterPresets = std::vector<FilterPreset*>();
     other.mActivePreset = nullptr;
@@ -73,7 +71,14 @@ LivePresetsModel& LivePresetsModel::operator=(LivePresetsModel&& other) noexcept
 
 bool LivePresetsModel::initFromChunkHandler(std::string &key, std::vector<const char *> &params) {
     if (key == "VERSION") {
-        //TODO check correct version
+        int fileVersion = std::stoi(params[0]);
+        if (mShowVersionWarning && fileVersion > VERSION) {
+            ShowConsoleMsg("[LivePresets] Warning: project was saved with a newer plugin version (");
+            ShowConsoleMsg(std::to_string(fileVersion).c_str());
+            ShowConsoleMsg("), current version is ");
+            ShowConsoleMsg(std::to_string(VERSION).c_str());
+            ShowConsoleMsg(". Some data may be missing.\n");
+        }
         return true;
     }
     if (key == "UNDO") {
@@ -82,6 +87,10 @@ bool LivePresetsModel::initFromChunkHandler(std::string &key, std::vector<const 
     }
     if (key == "HIDEMUTEDTRACKS") {
         mIsHideMutedTracks = (bool) std::stoi(params[0]);
+        return true;
+    }
+    if (key == "VERSIONWARNING") {
+        mShowVersionWarning = (bool) std::stoi(params[0]);
         return true;
     }
     if (key == "RESELECTPRESETS") {
@@ -110,12 +119,6 @@ bool LivePresetsModel::initFromChunkHandler(std::string &key, ProjectStateContex
     }
     if (key == "FILTERPRESET") {
         mFilterPresets.push_back(new FilterPreset(ctx));
-        return true;
-    }
-    if (key == "HARDWARE") {
-        if (auto* hw = Hardware_Create(ctx)) {
-            mHardwares.push_back(hw);
-        }
         return true;
     }
     return false;
@@ -158,6 +161,7 @@ void LivePresetsModel::recallPreset(LivePreset* preset) {
         mActivePreset = preset;
         if (g_lpe->mController.mList)
             g_lpe->mController.mList->invalidate();
+        TrackList_AdjustWindows(true);
         PreventUIRefresh(-1);
         Undo_OnStateChangeEx2(nullptr, "Recall LivePreset", UNDO_STATE_ALL, -1);
         Undo_EndBlock("Recall LivePreset", UNDO_STATE_ALL);
@@ -202,6 +206,7 @@ void LivePresetsModel::persistHandler(WDL_FastString &str) const {
     str.AppendFormatted(4096, "VERSION %d\n", VERSION);
     str.AppendFormatted(4096, "UNDO %d\n", mDoUndo);
     str.AppendFormatted(4096, "HIDEMUTEDTRACKS %d\n", mIsHideMutedTracks);
+    str.AppendFormatted(4096, "VERSIONWARNING %d\n", mShowVersionWarning);
     str.AppendFormatted(4096, "RESELECTPRESETS %d\n", mIsReselectLivePresetByValueRecall);
     str.AppendFormatted(4096, "RESELECTFXPRESETS %d\n", mIsReselectFxPreset);
     str.AppendFormatted(4096, "LOADMUTED %d\n", mIsLoadStateOnMute);
@@ -214,10 +219,6 @@ void LivePresetsModel::persistHandler(WDL_FastString &str) const {
 
     for (const auto* preset : mFilterPresets) {
         preset->persist(str);
-    }
-
-    for (auto* hardware : mHardwares) {
-        Hardware_Persist(hardware, str);
     }
 }
 
@@ -237,9 +238,16 @@ void LivePresetsModel::recallByValue(int val) {
  * @param id the unique id
  */
 int LivePresetsModel::getRecallIdForPreset(LivePreset* preset, int id) {
-    for (auto* mPreset : mPresets) {
-        if ((mPreset->mRecallId == id && !GuidsEqual(preset->mGuid, mPreset->mGuid)) || id == -1) {
-            return getRecallIdForPreset(preset, id + 1);
+    if (id == -1) id = 0;
+    bool conflict = true;
+    while (conflict) {
+        conflict = false;
+        for (auto* mPreset : mPresets) {
+            if (mPreset->mRecallId == id && !GuidsEqual(preset->mGuid, mPreset->mGuid)) {
+                id++;
+                conflict = true;
+                break;
+            }
         }
     }
     return id;
@@ -286,11 +294,6 @@ std::string LivePresetsModel::getChunkId() const {
 }
 
 void LivePresetsModel::reset() {
-    for (auto* hardware : mHardwares) {
-        delete hardware;
-    }
-    mHardwares.clear();
-
     for (auto* preset : mPresets) {
         delete preset;
     }

@@ -47,38 +47,6 @@ MediaTrack* GetTrackByGUID(GUID g1) {
     return nullptr;
 }
 
-void AddControl(HWND parentHwnd, const char *name, int id, const char *widget, int style, int exStyle,
-                int x, int y, int width, int height, bool adjustDpi) {
-
-    //TODO get dpi scaling
-    int dpiFactor = adjustDpi ? 4 : 1;
-
-#ifdef _WIN32
-    auto hwnd = CreateWindowEx(
-            exStyle, widget, name, style,
-            x * dpiFactor, y * dpiFactor, width * dpiFactor, height * dpiFactor,
-            parentHwnd, nullptr, nullptr, nullptr
-    );
-    SetWindowLongPtrA(hwnd, GWL_ID, id);
-#else
-    SWELL_MakeSetCurParms(1, 1, 0, 0, parentHwnd, false, false);
-    SWELL_MakeControl(
-            name, id, widget, style,
-            x * dpiFactor, y * dpiFactor, width * dpiFactor, height * dpiFactor,
-            exStyle
-    );
-    SWELL_MakeSetCurParms(1, 1, 0, 0, nullptr, false, false);
-#endif
-}
-
-void RemoveControl(HWND hwnd) {
-#ifdef _WIN32
-    CloseWindow(hwnd);
-#else
-    SWELL_CloseWindow(hwnd);
-#endif
-}
-
 void GuidToInts(GUID g1, int inOut[4]) {
     inOut[0] = (int) g1.Data1;
     inOut[1] = g1.Data2;

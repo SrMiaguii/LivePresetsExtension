@@ -59,6 +59,7 @@ void FxInfo::saveCurrentState(bool update) {
     mPresetName = Parameter<std::string>(this, "PRESETNAME", buffer, update ? mPresetName.mFilter : RECALLED);
 
     mEnabled = Parameter<bool>(this, "ENABLED", TrackFX_GetEnabled(getTrack(), index), update ? mEnabled.mFilter : RECALLED);
+    mOnline = Parameter<bool>(this, "ONLINE", !TrackFX_GetOffline(getTrack(), index), update ? mOnline.mFilter : RECALLED);
 
     auto min = DBL_MIN;
     auto max = DBL_MAX;
@@ -91,6 +92,11 @@ void FxInfo::recallSettings() const {
         TrackFX_CopyToTrack(getTrack(), getCurrentIndex(), getTrack(), mIndex.mValue, true);
         index = mIndex.mValue;
     }
+
+    // If going online, set online FIRST so other parameters can be applied
+    bool goingOnline = !mOnline.isFilteredInChain() && mOnline.mValue && TrackFX_GetOffline(getTrack(), index);
+    if (goingOnline)
+        TrackFX_SetOffline(getTrack(), index, false);
 
     if (!mEnabled.isFilteredInChain() && TrackFX_GetEnabled(getTrack(), index) != mEnabled.mValue)
         TrackFX_SetEnabled(getTrack(), index, mEnabled.mValue);
@@ -125,6 +131,11 @@ void FxInfo::recallSettings() const {
             break;
         }
     }
+
+    // If going offline, set offline LAST so other parameters are applied first
+    bool goingOffline = !mOnline.isFilteredInChain() && !mOnline.mValue && !TrackFX_GetOffline(getTrack(), index);
+    if (goingOffline)
+        TrackFX_SetOffline(getTrack(), index, true);
 }
 
 MediaTrack* FxInfo::getTrack() const {
@@ -170,6 +181,7 @@ void FxInfo::persistHandler(WDL_FastString &str) const {
 
     str.AppendFormatted(4096, "NAME \"%s\"\n", mName.data());
     str.AppendFormatted(4096, "ENABLED %i %i\n", mEnabled.mValue, mEnabled.mFilter);
+    str.AppendFormatted(4096, "ONLINE %i %i\n", mOnline.mValue, mOnline.mFilter);
     str.AppendFormatted(4096, "INDEX %i %i\n", mIndex.mValue, mEnabled.mFilter);
     str.AppendFormatted(4096, "PRESET \"%s\" %i\n", mPresetName.mValue.data(), mPresetName.mFilter);
 }
@@ -189,6 +201,10 @@ bool FxInfo::initFromChunkHandler(std::string &key, std::vector<const char*> &pa
     }
     if (key == "ENABLED") {
         mEnabled = Parameter<bool>(this, "ENABLED", std::stoi(params[0]), (FilterMode) std::stoi(params[1]));
+        return true;
+    }
+    if (key == "ONLINE") {
+        mOnline = Parameter<bool>(this, "ONLINE", std::stoi(params[0]), (FilterMode) std::stoi(params[1]));
         return true;
     }
     if (key == "INDEX") {
@@ -230,6 +246,7 @@ FilterPreset* FxInfo::extractFilterPreset() {
 
     childs.push_back(mParamInfo.extractFilterPreset());
     childs.push_back(mEnabled.extractFilterPreset());
+    childs.push_back(mOnline.extractFilterPreset());
     childs.push_back(mIndex.extractFilterPreset());
     childs.push_back(mPresetName.extractFilterPreset());
 
@@ -243,6 +260,7 @@ bool FxInfo::applyFilterPreset(FilterPreset *preset) {
         auto toFilters = std::set<Filterable*>();
         toFilters.insert(&mParamInfo);
         toFilters.insert(&mEnabled);
+        toFilters.insert(&mOnline);
         toFilters.insert(&mIndex);
         toFilters.insert(&mPresetName);
 

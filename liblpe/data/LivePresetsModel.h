@@ -34,7 +34,6 @@
 #include <liblpe/data/models/LivePreset.h>
 #include <liblpe/data/models/base/Persistable.h>
 #include <liblpe/data/models/FilterPreset.h>
-#include <liblpe/data/models/Hardware.h>
 
 class LivePresetsModel : public Persistable {
 public:
@@ -50,8 +49,8 @@ public:
     bool mIsLoadStateOnMute = false;
     bool mIsReselectFxPreset = false;
     bool mIsReselectLivePresetByValueRecall = false;
+    bool mShowVersionWarning = true;
     std::string mDefaultFilterPreset;
-    std::vector<Hardware*> mHardwares;
     std::vector<LivePreset*> mPresets;
     std::vector<FilterPreset*> mFilterPresets;
 

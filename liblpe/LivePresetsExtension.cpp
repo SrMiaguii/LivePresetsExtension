@@ -58,12 +58,6 @@ LPE::LPE(REAPER_PLUGIN_HINSTANCE hInstance, HWND mainHwnd) : mInstance(hInstance
     ));
 
     mActions.add(new HotkeyCommand(
-            "LPE_OPENTOGGLE_CONTROL",
-            "LPE - Opens/Closes the LivePresetsExtension ControlView window",
-            std::bind(&LPE::toggleControlView, this)
-    ));
-
-    mActions.add(new HotkeyCommand(
             "LPE_TRACKSAVEALL",
             "LPE - Saves the track data into all presets",
             std::bind(&LPE::onApplySelectedTrackConfigsToAllPresets, this)
@@ -188,13 +182,6 @@ void LPE::onMenuClicked(const char* menustr, HMENU menu, int flag) {
         mii.cbSize = sizeof(MENUITEMINFO);
         mii.fMask = MIIM_TYPE | MIIM_ID;
         mii.fType = MFT_STRING;
-
-        text = "Control View (ALPHA)";
-        mii.dwTypeData = text.data();
-        mii.cch = text.size();
-
-        mii.wID = NamedCommandLookup("_LPE_OPENTOGGLE_CONTROL");
-        InsertMenuItem(subMenu, 1, true, &mii);
 
         //seperator
         mii = MENUITEMINFO();
@@ -357,10 +344,6 @@ void LPE::toggleMainWindow() {
     mController.toggleVisibility();
 }
 
-void LPE::toggleControlView() {
-    ControlViewController_ToggleVisibility(&mControlView);
-}
-
 void LPE::toggleAboutWindow() {
     mAboutController.toggleVisibility();
 }
@@ -376,7 +359,6 @@ void LPE::onProjectChanged(ReaProject *proj) {
     mProject = proj;
     mModel = &mModels[proj];
     mController.reset();
-    ControlViewController_Reset(&mControlView);
 }
 
 /*
@@ -434,5 +416,4 @@ void LPE::resetState(bool) {
 
     //cleaning data from ui
     mController.reset();
-    ControlViewController_Reset(&mControlView);
 }

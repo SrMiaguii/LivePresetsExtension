@@ -37,7 +37,6 @@
 #include <liblpe/data/models/TrackInfo.h>
 #include <liblpe/data/models/MasterTrackInfo.h>
 #include <liblpe/data/models/base/BaseCommand.h>
-#include <liblpe/data/models/ControlInfo.h>
 
 class LivePreset final : public BaseInfo {
 public:
@@ -49,18 +48,19 @@ public:
     //transient data
     BaseCommand::CommandID mRecallCmdId = 0;
     std::string mRecallIdDisplayingString = "";
+    mutable char mDateText[32] = "";
 
     //data to persist
     GUID mGuid = GUID();
     std::string mName;
     std::string mDescription;
+    std::string mFilterName;
     time_t mDate = time(nullptr);
     int mRecallId = -1;
 
     //data that can be recalled
     MasterTrackInfo* mMasterTrack = nullptr;
     std::vector<TrackInfo*> mTracks;
-    std::vector<std::shared_ptr<ControlInfo>> mControlInfos;
 
     [[nodiscard]] char *getTreeText() const override;
     void recallSettings() const override;

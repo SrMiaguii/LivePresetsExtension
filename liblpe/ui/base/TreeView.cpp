@@ -52,6 +52,13 @@ void TreeView::invalidate() {
     for (auto child : mAdapter->getChilds(nullptr)) {
         addItem(child, TVI_ROOT, false);
     }
+
+    // Collapse all root items so the tree starts fully collapsed
+    HTREEITEM hItem = TreeView_GetRoot(mHwnd);
+    while (hItem) {
+        TreeView_Expand(mHwnd, hItem, TVE_COLLAPSE);
+        hItem = TreeView_GetNextSibling(mHwnd, hItem);
+    }
 }
 
 void TreeView::invalidateChilds(HTREEITEM parent) {

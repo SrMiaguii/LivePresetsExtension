@@ -38,7 +38,6 @@
 #include <liblpe/data/models/base/PluginRecallStrategies.h>
 #include <liblpe/controller/AboutController.h>
 #include <liblpe/util/ProjectChangeListener.h>
-#include <liblpe/controller/ControlViewController.h>
 
 /**
  * LPE = LivePresetsExtension, main class that manages the base classes statically
@@ -52,7 +51,6 @@ public:
     std::map<ReaProject*, LivePresetsModel> mModels;
     PluginRecallStrategies mPrs;
     LivePresetsController mController;
-    ControlViewController mControlView;
     AboutController mAboutController;
     ProjectChangeListener mChangeListener;
 
@@ -79,7 +77,6 @@ private:
     void toggleMutedTracksVisibility();
     void toggleMainWindow();
     void toggleAboutWindow();
-    void toggleControlView();
     void onApplySelectedTrackConfigsToAllPresets();
 };
 

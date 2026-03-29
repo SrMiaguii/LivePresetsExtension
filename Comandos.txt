@@ -1,0 +1,3 @@
+meson setup build
+meson setup --reconfigure build
+meson compile livepresets_x64 -C builddir

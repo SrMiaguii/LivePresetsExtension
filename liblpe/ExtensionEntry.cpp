@@ -89,12 +89,13 @@ static bool loadAPI(void* (*getFunc)(const char*)) {
             REQUIRED_API(TrackFX_SetPreset),
             REQUIRED_API(TrackFX_GetEnabled),
             REQUIRED_API(TrackFX_SetEnabled),
+            REQUIRED_API(TrackFX_GetOffline),
+            REQUIRED_API(TrackFX_SetOffline),
             REQUIRED_API(TrackFX_GetNumParams),
             REQUIRED_API(TrackFX_GetParam),
             REQUIRED_API(TrackFX_SetParam),
             REQUIRED_API(TrackFX_GetFXGUID),
             REQUIRED_API(TrackList_AdjustWindows),
-            REQUIRED_API(GetLastTouchedFX),
             REQUIRED_API(GetMediaTrackInfo_Value),
             REQUIRED_API(GetCurrentProjectInLoadSave)
     };
@@ -168,9 +169,6 @@ static int toggleActionProc(int iCmd) {
     }
     if (iCmd == NamedCommandLookup("_LPE_TOGGLEMUTEDVISIBILITY")) {
         return LPE::isMutedShown();
-    }
-    if (iCmd == NamedCommandLookup("_LPE_OPENTOGGLE_CONTROL")) {
-        return ControlViewController_IsVisible(&g_lpe->mControlView);
     }
     if (iCmd == NamedCommandLookup("_LPE_OPENTOGGLE_ABOUT")) {
         return g_lpe->mAboutController.isVisible();

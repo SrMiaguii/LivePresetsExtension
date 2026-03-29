@@ -57,7 +57,6 @@ LivePreset::~LivePreset() {
         delete track;
     }
     mTracks.clear();
-    mControlInfos.clear();
 
     delete mMasterTrack;
 }
@@ -76,15 +75,13 @@ LivePreset& LivePreset::operator=(LivePreset&& other) noexcept {
     mRecallId = other.mRecallId;
     mMasterTrack = other.mMasterTrack;
     mTracks = other.mTracks;
-    mControlInfos = other.mControlInfos;
     mRecallCmdId = other.mRecallCmdId;
 
     //make all pointers null and create empty containers for now empty instance other that its destruction does not
     //affect this instance
-    mTracks = std::vector<TrackInfo*>();
-    mControlInfos = std::vector<std::shared_ptr<ControlInfo>>();
-    mMasterTrack = nullptr;
-    mRecallCmdId = 0;
+    other.mTracks = std::vector<TrackInfo*>();
+    other.mMasterTrack = nullptr;
+    other.mRecallCmdId = 0;
 
     return *this;
 }
@@ -186,6 +183,7 @@ void LivePreset::persistHandler(WDL_FastString& str) const {
 
     str.AppendFormatted(4096, "NAME \"%s\"\n", mName.data());
     str.AppendFormatted(4096, "DESC \"%s\"\n", mDescription.data());
+    str.AppendFormatted(4096, "FILTERNAME \"%s\"\n", mFilterName.data());
     str.AppendFormatted(4096, "DATE %li\n", mDate);
     str.AppendFormatted(4096, "RECALLID %i\n", mRecallId);
 
@@ -193,10 +191,6 @@ void LivePreset::persistHandler(WDL_FastString& str) const {
 
     for (auto *const track : mTracks) {
         track->persist(str);
-    }
-
-    for (const auto& info : mControlInfos) {
-        ControlInfo_Persist(info.get(), str);
     }
 }
 
@@ -214,6 +208,10 @@ bool LivePreset::initFromChunkHandler(std::string &key, std::vector<const char *
     }
     if (key == "DESC") {
         mDescription = params[0];
+        return true;
+    }
+    if (key == "FILTERNAME") {
+        mFilterName = params[0];
         return true;
     }
     if (key == "DATE") {
@@ -236,12 +234,6 @@ bool LivePreset::initFromChunkHandler(std::string &key, ProjectStateContext *ctx
         mTracks.emplace_back(new TrackInfo(nullptr, ctx));
         return true;
     }
-    if (key == "CONTROLINFO") {
-        if (auto *info = ControlInfo_Create(this, ctx)) {
-            mControlInfos.emplace_back(info);
-        }
-        return true;
-    }
 
     return BaseInfo::initFromChunkHandler(key, ctx);
 }
@@ -250,9 +242,6 @@ void LivePreset::recallSettings() const {
     mMasterTrack->recallSettings();
     for (auto *const track : mTracks) {
         track->recallSettings();
-    }
-    for (const auto& info : mControlInfos) {
-        ControlInfo_RecallSettings(info.get());
     }
 }
 
@@ -283,10 +272,6 @@ FilterPreset* LivePreset::extractFilterPreset() {
         childs.push_back(track->extractFilterPreset());
     }
 
-    for (const auto& ctrl : mControlInfos) {
-        childs.push_back(ctrl->extractFilterPreset());
-    }
-
     return new FilterPreset(id, LIVEPRESET, mFilter, childs);
 }
 
@@ -297,13 +282,6 @@ bool LivePreset::applyFilterPreset(FilterPreset *preset) {
         auto toFilters = std::set<Filterable*>();
         toFilters.insert(mMasterTrack);
         toFilters.insert(mTracks.begin(), mTracks.end());
-
-        //convert shared_ptr to raw pointer
-        auto temp = std::vector<ControlInfo*>();
-        for (const auto& ctrl : mControlInfos) {
-            temp.push_back(ctrl.get());
-        }
-        toFilters.insert(temp.begin(), temp.end());
 
         for (auto& child : preset->mChilds) {
             for (auto *toFilter : toFilters) {
