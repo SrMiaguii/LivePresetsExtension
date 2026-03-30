@@ -59,7 +59,7 @@ void SettingsController::onInitDlg() {
     int index = 0;
     for (auto *filter : filterNames) {
         if (*filter == g_lpe->mModel->mDefaultFilterPreset) {
-            SendMessage(mCombo->mHwnd, CB_SETCURSEL, 0, index);
+            SendMessage(mCombo->mHwnd, CB_SETCURSEL, index, 0);
         }
         index++;
     }
