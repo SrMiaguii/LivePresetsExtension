@@ -1,4 +1,4 @@
-# LivePresets extension
+# LivePresets Extension
 An extension for REAPER to add extended preset support
 
 ## How to build
