@@ -6,4 +6,4 @@ LivePresets used gradle native as the build system. It depends on [WDL](https://
 
 `git clone --recursive https://github.com/Burtan/LivePresetsExtension.git`
 
-Build tasks to generate linux x64, windows x64 and x86 and mac x64 are included. The binaries are automatically installed into the default reaper extensions folder.
+Build tasks to generate linux x64, windows x64 and x86 and mac x64 are included. The binaries are installed into the default reaper userplugins folder.
