@@ -2,6 +2,9 @@ name: ci_meson
 
 on: [push]
 
+permissions:
+  contents: write
+
 jobs:
   linux:
     runs-on: ubuntu-latest
