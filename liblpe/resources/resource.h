@@ -30,6 +30,7 @@
 #define IDC_VERSION_WARNING             1373
 #define IDC_ABOUT_VERSION               1374
 #define IDC_ABOUT_DATE                  1375
+#define IDC_FILTER_DELETE               1377
 
 //styles
 #define DEFAULT_FONT 8, "MS Shell Dlg"

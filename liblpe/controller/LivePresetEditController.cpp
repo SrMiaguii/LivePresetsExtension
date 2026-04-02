@@ -32,6 +32,7 @@
 #include <liblpe/LivePresetsExtension.h>
 #include <liblpe/resources/resource.h>
 #include <liblpe/data/models/FilterPreset.h>
+#include <algorithm>
 
 WNDPROC LivePresetEditController::defWndProc;
 
@@ -47,6 +48,7 @@ void LivePresetEditController::onInitDlg() {
     mResizer.init_item(IDC_COMBO, 1.0, 0.0, 1.0, 0.0);
     mResizer.init_item(IDC_LABEL1, 1.0, 0.0, 1.0, 0.0);
     mResizer.init_item(IDC_SETTINGS, 1.0, 0.0, 1.0, 0.0);
+    mResizer.init_item(IDC_FILTER_DELETE, 1.0, 0.0, 1.0, 0.0);
 
     //fills TextEdits
     SetDlgItemText(mHwnd, IDC_NAME, mPreset->mName.data());
@@ -172,6 +174,26 @@ void LivePresetEditController::onCommand(WPARAM wparam, LPARAM lparam) {
         case IDC_SETTINGS:
             showFilterSettings();
             break;
+        case IDC_FILTER_DELETE: {
+            int index = SendMessage(mCombo->mHwnd, CB_GETCURSEL, 0, 0);
+            if (index == CB_ERR) break;
+            char name[256];
+            SendMessage(mCombo->mHwnd, CB_GETLBTEXT, index, (LPARAM) name);
+            auto delName = std::string(name);
+            char msg[256];
+            snprintf(msg, 256, "Delete filter \"%s\"?", delName.c_str());
+            if (MessageBox(mHwnd, msg, "Delete Filter", MB_YESNO) != IDYES) break;
+            // Clear default if needed
+            if (g_lpe->mModel->mDefaultFilterPreset == delName)
+                g_lpe->mModel->mDefaultFilterPreset = "";
+            auto& fps = g_lpe->mModel->mFilterPresets;
+            fps.erase(std::remove_if(fps.begin(), fps.end(),
+                [&delName](FilterPreset* f){ return f->mId.name == delName; }), fps.end());
+            mCombo->getAdapter()->mItems = FilterPreset_GetNames(fps);
+            mCombo->invalidate();
+            SendMessage(mCombo->mHwnd, CB_SETCURSEL, -1, 0);
+            break;
+        }
         case IDC_ADD: {
             auto *filter = mPreset->extractFilterPreset();
             std::string name = "New preset";
